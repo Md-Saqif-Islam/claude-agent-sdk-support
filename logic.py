@@ -52,3 +52,33 @@ def gate_decision(tool_name: str, tool_input: dict, state: dict, caller: str | N
 
 
     return None
+
+
+def is_retryable(result: dict) -> bool:
+    """True only for a structured error explicitly marked retryable."""
+    return (
+        result.get("ok") is False
+        and result.get("error", {}).get("retryable") is True
+    )
+
+
+def call_with_retry(fn, max_attempts: int = MAX_ATTEMPTS) -> dict:
+    """Run fn() and retry while it returns a retryable structured error.
+
+    fn takes no arguments and returns a result dict. Non-retryable errors are
+    returned immediately so the agent sees them and can change course.
+    """
+    result = fn()
+    attempts = 1
+
+    for _ in range(max(0, max_attempts - 1)):
+        if not is_retryable(result):
+            break
+
+        result = fn()
+        attempts += 1
+
+    if isinstance(result, dict) and result.get("ok") is False:
+        result["error"]["attempts"] = attempts
+
+    return result
