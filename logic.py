@@ -9,7 +9,7 @@ ORDERS = {"A-100":{"status": "delivered","total":240.0},
         }
 
 def error(category: str, retryable: bool, message: str, **extra) -> dict:
-    """Structured, categorised error the called can act on."""
+    """Structured, categorised error the caller can act on."""
     out = {"ok": False, "error": {"category": category,
                                   "retryable": retryable,
                                   "message": message}}
@@ -31,7 +31,7 @@ def gate_decision(tool_name: str, tool_input: dict, state: dict, caller: str | N
     """Return None if the tool call is allowed, otherwise return a reason for denying it.
     
     The caller tells us which agent made the request. It is None on the main thread and
-    containts the registered agent name when the call comes from a subagent.
+    contains the registered agent name when the call comes from a subagent.
     
     State values are read defensively so missing data does not cause the hook to crash."""
 
@@ -48,7 +48,7 @@ def gate_decision(tool_name: str, tool_input: dict, state: dict, caller: str | N
     over_threshold = tool_input.get("amount", 0)> APPROVAL_THRESHOLD
 
     if over_threshold and tool_input.get("order_id") not in state.get("approvals", set()):
-        return (f"refund above {APPROVAL_THRESHOLD} require a recorded manager approval for this order; call record_approval first")
+        return (f"refunds above {APPROVAL_THRESHOLD} require a recorded manager approval for this order; call record_approval first")
 
 
     return None
