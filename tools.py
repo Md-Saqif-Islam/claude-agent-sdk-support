@@ -79,5 +79,9 @@ def _upstream_lookup(order_id: str) -> dict:
     "lookup_order",
     "Look up a single order by its identifier. Read-only. "
     "Returns status and total, or a structured error if not found.",
-    {"order_id": str},
-)
+    {"order_id": str},)
+
+async def lookup_order(args):
+ order_id = args.get("order_id")
+ result = logic.call_with_retry(lambda: _upstream_lookup(order_id))
+ return {"content": [{"type": "text", "text": str(result)}]}
