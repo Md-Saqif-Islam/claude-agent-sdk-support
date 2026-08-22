@@ -85,3 +85,15 @@ async def lookup_order(args):
  order_id = args.get("order_id")
  result = logic.call_with_retry(lambda: _upstream_lookup(order_id))
  return {"content": [{"type": "text", "text": str(result)}]}
+
+
+
+@tool("process_refund",
+ "Issue a refund against a verified account. Requires prior identity "
+ "verification, and manager approval for amounts above 500. A refund "
+ "cannot exceed the order total and each order can be refunded once.",
+ {"order_id": str, "amount": float})
+
+async def process_refund(args):
+ result = logic.apply_refund(args.get("order_id"), args.get("amount", 0), STATE)
+ return {"content": [{"type": "text", "text": str(result)}]}
